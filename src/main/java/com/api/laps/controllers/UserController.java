@@ -39,4 +39,9 @@ public class UserController {
         return userRepository.save(user);
     }
 
+    @PostMapping("/login")
+    public User login(@RequestBody User user) {
+        return userRepository.searchByEmailAndPassword(user.getEmail(), user.getPassword());
+    }
+
 }
