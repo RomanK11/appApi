@@ -1,6 +1,7 @@
 package com.api.laps.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.laps.email.EmailSender;
 import com.api.laps.models.User;
 import com.api.laps.repos.UserRepository;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -23,31 +26,60 @@ public class UserController {
     public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
-    @GetMapping()
-    public Iterable<User> getUsers() {
-        return userRepository.findAll();
-    }
+    EmailSender emailSender = new EmailSender();
 
     public boolean existsByField(String fieldValue1, String fieldValue2) {
-        return userRepository.findByEmailAndPassword(fieldValue1, fieldValue2) != null;
+        return userRepository.findByNicknameAndPassword(fieldValue1, fieldValue2) != null;
     }
 
     @PostMapping(path = "/registr")
     public User create(@RequestBody User user) {
-        
+        emailSender.sendEmail(user.getEmail(), "Subject");
         return userRepository.save(user);
     }
 
     @PostMapping("/login")
     public User login(@RequestBody User user) {
-        return userRepository.searchByEmailAndPassword(user.getEmail(), user.getPassword());
+        return userRepository.searchByNicknameAndPassword(user.getNickname(), user.getPassword());
     }
 
-    @DeleteMapping(path = "/delete-user/{email}")
+    //Добавление email пользователю
+    @PostMapping("/add-email/{nickname}")
+    public ResponseEntity<String> addEmail(@PathVariable String nickname, @RequestBody String value) {
+        User user = userRepository.searchByNickname(nickname);
+        if (user != null) {
+            user.setEmail(value);
+            userRepository.save(user);
+            return ResponseEntity.ok("Значение успешно добавлено в колонку пользователя с email: " + nickname);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/accept/{email}")
+    public String getMethodName(@PathVariable String email) {
+        User user = userRepository.findByEmail(email); // Предположим, у вас есть метод findByEmail в UserRepository для поиска пользователя по email
+        user.setAcceptType(null);
+        user.setAcceptType("1");
+        userRepository.save(user);
+        return "true";
+    }
+    
+//     @PostMapping("/accept/{email}")
+// public ResponseEntity<String> addValueToColumn(@PathVariable String email, @RequestBody String value) {
+//     User user = userRepository.findByEmail(email); // Предположим, у вас есть метод findByEmail в UserRepository для поиска пользователя по email
+//     if (user != null) {
+//         user.setAcceptType(value);
+//         userRepository.save(user);
+//         return ResponseEntity.ok("Значение успешно добавлено в колонку пользователя с email: " + email);
+//     } else {
+//         return ResponseEntity.notFound().build();}
+//     }
+
+    @DeleteMapping(path = "/delete-user/{nickname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable("email") String email) {
-        userRepository.delete(userRepository.searchByEmail(email));
+    public void deleteUser(@PathVariable("nickname") String nickname) {
+        userRepository.delete(userRepository.searchByNickname(nickname));
     }
 
 }

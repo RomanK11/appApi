@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Подтверждение адреса электронной почты</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+    
+        h1 {
+            font-size: 24px;
+        }
+    
+        p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Подтверждение адреса электронной почты</h1>
+    <p>Здравствуйте!</p>
+    <p>Вы получили это письмо, потому что зарегистрировались на нашем сайте.</p>
+    <p>Пожалуйста, нажмите на кнопку ниже для подтверждения адреса электронной почты:</p>
+    <button id="confirmButton">Подтвердить адрес</button>
+    <script>
+        document.getElementById('confirmButton').addEventListener('click', function() {
+            var xhr = new XMLHttpRequest();
+    var url = "http://127.0.0.1:8080/api/users/accept/"; // Замените на свой URL
+    
+    // Здесь нужно приготовить данные для отправки на сервер
+    var data = {
+        email: "1"
+    };
+    
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            alert('Адрес электронной почты подтвержден!');
+        }
+    };
+    
+    xhr.send(JSON.stringify(data));
+});
+        
+    </script>
+</body>
+</html>
