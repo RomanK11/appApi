@@ -34,7 +34,7 @@ public class UserController {
 
     @PostMapping(path = "/registr")
     public User create(@RequestBody User user) {
-        emailSender.sendEmail(user.getEmail(), "Subject");
+        
         return userRepository.save(user);
     }
 
@@ -49,6 +49,7 @@ public class UserController {
         User user = userRepository.searchByNickname(nickname);
         if (user != null) {
             user.setEmail(value);
+            emailSender.sendEmail(user.getEmail(), "Subject");
             userRepository.save(user);
             return ResponseEntity.ok("Значение успешно добавлено в колонку пользователя с email: " + nickname);
         } else {
@@ -65,17 +66,6 @@ public class UserController {
         return "true";
     }
     
-//     @PostMapping("/accept/{email}")
-// public ResponseEntity<String> addValueToColumn(@PathVariable String email, @RequestBody String value) {
-//     User user = userRepository.findByEmail(email); // Предположим, у вас есть метод findByEmail в UserRepository для поиска пользователя по email
-//     if (user != null) {
-//         user.setAcceptType(value);
-//         userRepository.save(user);
-//         return ResponseEntity.ok("Значение успешно добавлено в колонку пользователя с email: " + email);
-//     } else {
-//         return ResponseEntity.notFound().build();}
-//     }
-
     @DeleteMapping(path = "/delete-user/{nickname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable("nickname") String nickname) {
